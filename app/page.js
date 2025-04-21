@@ -1,13 +1,51 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { Clock, Search, RefreshCw, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Clock, Search, RefreshCw, ExternalLink } from "lucide-react";
+
+// Platform Filter Component
+// This component allows users to filter games by platform
+const PlatformFilter = ({ selectedPlatform, setSelectedPlatform }) => {
+  const platforms = [
+    { id: 4, name: 'PC' },
+    { id: 187, name: 'PS5' },
+    { id: 1, name: 'Xbox' },
+    { id: 18, name: 'PS4' },
+    { id: 7, name: 'Switch' },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2 mb-6">
+      <button 
+        onClick={() => setSelectedPlatform(null)}
+        className={`px-3 py-1 rounded-md text-sm ${
+          !selectedPlatform ? 'bg-purple-700 text-white' : 'bg-gray-700 text-gray-300'
+        }`}
+      >
+        All Platforms
+      </button>
+      {platforms.map((platform) => (
+        <button
+          key={platform.id}
+          onClick={() => setSelectedPlatform(platform.id)}
+          className={`px-3 py-1 rounded-md text-sm ${
+            selectedPlatform === platform.id ? 'bg-purple-700 text-white' : 'bg-gray-700 text-gray-300'
+          }`}
+        >
+          {platform.name}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 
 // Main App Component
 export default function GamingNewsApp() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState(null);
 
   useEffect(() => {
     fetchGamingNews();
@@ -18,34 +56,36 @@ export default function GamingNewsApp() {
     try {
       // Get current date and format as YYYY-MM-DD
       const today = new Date();
-      const currentDate = today.toISOString().split('T')[0];
-      
+      const currentDate = today.toISOString().split("T")[0];
+
       // Set a start date (e.g., 3 months ago)
       const startDate = new Date();
       startDate.setMonth(today.getMonth() - 3);
-      const formattedStartDate = startDate.toISOString().split('T')[0];
-  
+      const formattedStartDate = startDate.toISOString().split("T")[0];
+
       // Using RAWG API with dynamic dates
       const response = await fetch(
         `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&dates=${formattedStartDate},${currentDate}&ordering=-released&page_size=10`
       );
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch gaming news');
+        throw new Error("Failed to fetch gaming news");
       }
-      
+
       const data = await response.json();
       setNews(data.results);
       setLoading(false);
     } catch (err) {
-      setError('Failed to load gaming news. Please try again later.');
+      setError("Failed to load gaming news. Please try again later.");
       setLoading(false);
     }
   };
-  const filteredNews = news.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredNews = news.filter((item) => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (selectedPlatform 
+      ? item.platforms?.some(p => p.platform.id === selectedPlatform)
+      : true)
   );
-
   return (
     <div className="min-h-screen text-gray-200">
       {/* Header */}
@@ -54,7 +94,9 @@ export default function GamingNewsApp() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
               <h1 className="text-3xl font-bold text-white">GamePulse</h1>
-              <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">DAILY</span>
+              <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+                DAILY
+              </span>
             </div>
             <div className="relative w-full md:w-64">
               <input
@@ -69,21 +111,31 @@ export default function GamingNewsApp() {
           </div>
         </div>
       </header>
-
+  
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Platform Filter */}
+        <section className="mb-6">
+          <PlatformFilter 
+            selectedPlatform={selectedPlatform}
+            setSelectedPlatform={setSelectedPlatform}
+          />
+        </section>
+  
         {/* Featured Section */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">Today's Gaming Highlights</h2>
-            <button 
-              onClick={fetchGamingNews} 
+            <h2 className="text-2xl font-bold text-white">
+              Today's Gaming Highlights
+            </h2>
+            <button
+              onClick={fetchGamingNews}
               className="flex items-center bg-purple-800 hover:bg-purple-700 text-white px-3 py-1 rounded-md transition"
             >
               <RefreshCw className="h-4 w-4 mr-1" /> Refresh
             </button>
           </div>
-
+  
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>
@@ -94,17 +146,17 @@ export default function GamingNewsApp() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredNews.slice(0, 3).map(item => (
+              {filteredNews.slice(0, 3).map((item) => (
                 <FeaturedCard key={item.id} game={item} />
               ))}
             </div>
           )}
         </section>
-
+  
         {/* Latest News Section */}
         <section>
           <h2 className="text-2xl font-bold text-white mb-6">Latest Updates</h2>
-          
+  
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>
@@ -119,14 +171,14 @@ export default function GamingNewsApp() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {filteredNews.slice(3).map(item => (
+              {filteredNews.slice(3).map((item) => (
                 <NewsCard key={item.id} game={item} />
               ))}
             </div>
           )}
         </section>
       </main>
-
+  
       {/* Footer */}
       <footer className="bg-gray-950 text-gray-400 py-6">
         <div className="container mx-auto px-4 text-center">
@@ -143,8 +195,8 @@ function FeaturedCard({ game }) {
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition">
       <div className="h-48 overflow-hidden">
-        <img 
-          src={game.background_image || "/api/placeholder/400/200"} 
+        <img
+          src={game.background_image || "/api/placeholder/400/200"}
           alt={game.name}
           className="w-full h-full object-cover transform hover:scale-105 transition duration-500"
         />
@@ -153,7 +205,7 @@ function FeaturedCard({ game }) {
         <h3 className="text-xl font-bold text-white mb-2">{game.name}</h3>
         <div className="flex justify-between items-center text-sm text-gray-400 mb-3">
           <div className="flex items-center">
-            <Clock className="h-3 w-3 mr-1" /> 
+            <Clock className="h-3 w-3 mr-1" />
             {new Date(game.released).toLocaleDateString()}
           </div>
           <div className="bg-purple-900/50 px-2 py-0.5 rounded">
@@ -161,16 +213,19 @@ function FeaturedCard({ game }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 mb-4">
-          {game.genres?.slice(0, 3).map(genre => (
-            <span key={genre.id} className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded">
+          {game.genres?.slice(0, 3).map((genre) => (
+            <span
+              key={genre.id}
+              className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded"
+            >
               {genre.name}
             </span>
           ))}
         </div>
-        <a 
+        <a
           href={`https://rawg.io/games/${game.slug}`}
           target="_blank"
-          rel="noopener noreferrer" 
+          rel="noopener noreferrer"
           className="inline-flex items-center text-purple-400 hover:text-purple-300"
         >
           Read More <ExternalLink className="h-3 w-3 ml-1" />
@@ -186,7 +241,7 @@ function NewsCard({ game }) {
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow hover:shadow-purple-900/20 transition">
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-1/4 h-32 md:h-auto">
-          <img 
+          <img
             src={game.background_image || "/api/placeholder/200/200"}
             alt={game.name}
             className="w-full h-full object-cover"
@@ -196,7 +251,7 @@ function NewsCard({ game }) {
           <h3 className="text-lg font-bold text-white mb-2">{game.name}</h3>
           <div className="flex justify-between items-center text-xs text-gray-400 mb-3">
             <div className="flex items-center">
-              <Clock className="h-3 w-3 mr-1" /> 
+              <Clock className="h-3 w-3 mr-1" />
               {new Date(game.released).toLocaleDateString()}
             </div>
             <div className="bg-purple-900/50 px-2 py-0.5 rounded">
@@ -204,20 +259,26 @@ function NewsCard({ game }) {
             </div>
           </div>
           <p className="text-gray-400 text-sm mb-3">
-            {game.tags?.slice(0, 2).map(tag => tag.name).join(', ')}
+            {game.tags
+              ?.slice(0, 2)
+              .map((tag) => tag.name)
+              .join(", ")}
           </p>
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-1">
-              {game.platforms?.slice(0, 3).map(platform => (
-                <span key={platform.platform.id} className="text-xs bg-gray-700 px-2 py-0.5 rounded">
+              {game.platforms?.slice(0, 3).map((platform) => (
+                <span
+                  key={platform.platform.id}
+                  className="text-xs bg-gray-700 px-2 py-0.5 rounded"
+                >
                   {platform.platform.name}
                 </span>
               ))}
             </div>
-            <a 
+            <a
               href={`https://rawg.io/games/${game.slug}`}
               target="_blank"
-              rel="noopener noreferrer" 
+              rel="noopener noreferrer"
               className="inline-flex items-center text-purple-400 hover:text-purple-300 text-sm"
             >
               Details <ExternalLink className="h-3 w-3 ml-1" />
