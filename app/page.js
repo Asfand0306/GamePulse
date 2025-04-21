@@ -16,9 +16,18 @@ export default function GamingNewsApp() {
   const fetchGamingNews = async () => {
     setLoading(true);
     try {
-      // Using RAWG API for gaming news
+      // Get current date and format as YYYY-MM-DD
+      const today = new Date();
+      const currentDate = today.toISOString().split('T')[0];
+      
+      // Set a start date (e.g., 3 months ago)
+      const startDate = new Date();
+      startDate.setMonth(today.getMonth() - 3);
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+  
+      // Using RAWG API with dynamic dates
       const response = await fetch(
-        `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&dates=2023-01-01,2024-04-10&ordering=-released&page_size=10`
+        `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&dates=${formattedStartDate},${currentDate}&ordering=-released&page_size=10`
       );
       
       if (!response.ok) {
