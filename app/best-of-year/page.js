@@ -28,7 +28,7 @@ export default function BestOfYear() {
         `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}` +
           `&dates=${year}-01-01,${year}-12-31` +
           "&ordering=-rating" + // Sort by rating descending
-          "&page_size=10"
+          "&page_size=12"
       );
 
       if (!response.ok) {
@@ -47,7 +47,7 @@ export default function BestOfYear() {
   };
 
   return (
-    <div className="min-h-screen text-gray-200 bg-gray-900">
+    <div className="min-h-screen text-gray-200">
       {/* Header */}
       <header className="bg-purple-900 shadow-lg">
         <div className="container mx-auto px-4 py-6">
@@ -59,8 +59,8 @@ export default function BestOfYear() {
               <ChevronLeft className="h-5 w-5 mr-1" />
               Back
             </button>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <Award className="h-6 w-6 mr-2" />
+            <h1 className="text-4xl font-bold text-white flex items-center">
+              <Award className="h-6 w-6 mr-2" size={50}/>
               Best Games by Year
             </h1>
             <div className="w-10"></div> {/* Spacer for alignment */}
@@ -120,7 +120,7 @@ export default function BestOfYear() {
 
 function GameCard({ game }) {
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition">
+    <div className="bg-background rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition">
       <div className="h-48 overflow-hidden">
         <img
           src={game.background_image || "/placeholder-game.jpg"}
