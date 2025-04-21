@@ -256,24 +256,40 @@ function FeaturedCard({ game }) {
 // News Card Component
 function NewsCard({ game }) {
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden shadow hover:shadow-purple-900/20 transition">
+    <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
       <div className="flex flex-col md:flex-row">
-        <div className="w-full md:w-1/4 h-32 md:h-auto">
+        <div className="w-full md:w-1/4 h-32 md:h-auto relative overflow-hidden">
           <img
             src={game.background_image || "/api/placeholder/200/200"}
             alt={game.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+            <div className="flex flex-wrap gap-1">
+              {game.platforms?.slice(0, 3).map((platform) => (
+                <span
+                  key={platform.platform.id}
+                  className="text-xs bg-gray-700/50 px-2 py-0.5 rounded text-white"
+                >
+                  {platform.platform.name}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
         <div className="w-full md:w-3/4 p-4">
-          <h3 className="text-lg font-bold text-white mb-2">{game.name}</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-bold text-white transition-all duration-300 hover:text-purple-400">
+              {game.name}
+            </h3>
+            <div className="bg-purple-900/50 px-2 py-0.5 rounded">
+              Rating: {game.rating}/5
+            </div>
+          </div>
           <div className="flex justify-between items-center text-xs text-gray-400 mb-3">
             <div className="flex items-center">
               <Clock className="h-3 w-3 mr-1" />
               {new Date(game.released).toLocaleDateString()}
-            </div>
-            <div className="bg-purple-900/50 px-2 py-0.5 rounded">
-              Rating: {game.rating}/5
             </div>
           </div>
           <p className="text-gray-400 text-sm mb-3">
@@ -283,32 +299,20 @@ function NewsCard({ game }) {
             {game.genres?.slice(0, 3).map((genre) => (
               <span
                 key={genre.id}
-                className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded"
+                className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded transition-all duration-300 hover:bg-purple-800 hover:text-white cursor-pointer"
               >
                 {genre.name}
               </span>
             ))}
           </div>
-          <div className="flex justify-between items-center">
-            <div className="flex flex-wrap gap-1">
-              {game.platforms?.slice(0, 3).map((platform) => (
-                <span
-                  key={platform.platform.id}
-                  className="text-xs bg-gray-700 px-2 py-0.5 rounded"
-                >
-                  {platform.platform.name}
-                </span>
-              ))}
-            </div>
-            <a
-              href={`https://rawg.io/games/${game.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-purple-400 hover:text-purple-300 text-sm"
-            >
-              Details <ExternalLink className="h-3 w-3 ml-1" />
-            </a>
-          </div>
+          <a
+            href={`https://rawg.io/games/${game.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-purple-400 hover:text-purple-300 text-sm transition-all duration-300 hover:scale-105"
+          >
+            Details <ExternalLink className="h-3 w-3 ml-1" />
+          </a>
         </div>
       </div>
     </div>
