@@ -1,21 +1,15 @@
 import { useState } from 'react';
 import { Gamepad2, FolderHeart, Award, Menu, X } from 'lucide-react';
 
-export default function SidebarPopup() {
-  const [isOpen, setIsOpen] = useState(false);
-
+export default function SidebarPopup({ isOpen, setIsOpen }) {
+  
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
+
   const navigateTo = (path) => {
-    // In a real implementation, you might use router navigation
-    // This is a placeholder for demonstration
     console.log(`Navigating to: ${path}`);
-    // Example with window.location:
-    // window.location.href = path;
-   
-    // Close the sidebar after navigation
     setIsOpen(false);
   };
 
@@ -24,22 +18,14 @@ export default function SidebarPopup() {
       {/* Hamburger Button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 p-2 rounded-md text-white z-50"
+        className="p-2 rounded-md text-white z-50"
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Overlay - only visible when sidebar is open, but now without blur */}
-      {isOpen && (
-        <div
-          className="fixed inset-0  bg-opacity-30 z-40"
-          onClick={toggleSidebar}
-        />
-      )}
-
       {/* Sidebar with contained glass effect */}
-      <div className={`fixed top-0 left-0 h-screen w-64 backdrop-blur-md text-white p-4 z-50 transform transition-transform duration-300 ease-in-out border-r border-white border-opacity-10 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed top-0 left-0 h-full w-64 backdrop-blur-md text-white p-4 z-40 transform transition-transform duration-300 ease-in-out border-r border-white border-opacity-10 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Close button at the top */}
         <div className="absolute top-4 right-4">
           <button 

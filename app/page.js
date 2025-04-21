@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect,useMemo } from "react";
 import { Clock, Search, RefreshCw, ExternalLink } from "lucide-react";
-import Sidebar from "./components/SidebarPopup";
 import SidebarPopup from "./components/SidebarPopup";
 
 // Platform Filter Component
@@ -51,6 +50,9 @@ export default function GamingNewsApp() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+
 
   useEffect(() => {
     fetchGamingNews();
@@ -105,30 +107,36 @@ export default function GamingNewsApp() {
   return (
     <div className="min-h-screen text-gray-200">
       {/* Header */}
-      <header className="bg-purple-900 shadow-lg">
-      
-        <div className="container mx-auto px-4 py-6">
-        <SidebarPopup />
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center mb-4 md:mb-0">
-              <h1 className="text-3xl font-bold text-white">GamePulse</h1>
-              <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                DAILY
-              </span>
-            </div>
-            <div className="relative w-full md:w-64">
-              <input
-                type="text"
-                placeholder="Search games..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-gray-800 border border-purple-700 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-purple-400" />
-            </div>
+<header className="bg-purple-900 shadow-lg relative">
+  <div className="container mx-auto px-4 py-6">
+    <div className="flex items-center justify-between">
+      {/* Sidebar and logo container */}
+      <div className="flex items-center space-x-4">
+      <SidebarPopup isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-45' : 'ml-0'}`}>
+          <div className="flex items-center">
+            <h1 className="text-3xl font-bold text-white">GamePulse</h1>
+            <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+              DAILY
+            </span>
           </div>
         </div>
-      </header>
+      </div>
+      
+      {/* Search bar */}
+      <div className="relative w-full md:w-64">
+        <input
+          type="text"
+          placeholder="Search games..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-gray-800 border border-purple-700 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        />
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-purple-400" />
+      </div>
+    </div>
+  </div>
+</header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
