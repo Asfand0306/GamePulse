@@ -13,17 +13,19 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
 
   return (
     <>
+      {/* Hamburger Button */}
+      <button
+        onClick={toggleSidebar}
+        className="fixed top-4 left-4 p-2 rounded-md text-white z-50"
+        aria-label="Toggle menu"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
       {/* Sidebar with contained glass effect */}
       <div className={`fixed top-0 left-0 h-full w-64 backdrop-blur-md text-white p-4 z-40 transform transition-transform duration-300 ease-in-out border-r border-white border-opacity-10 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-end space-x-4 mb-8">
           <h1 className="text-xl font-bold">GameHub</h1>
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-md hover:bg-white hover:bg-opacity-10 transition-colors"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
 
         <nav className="flex-1">
