@@ -87,7 +87,6 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
             </li>
           </ul>
         </nav>
-
         {/* Footer section */}
         <div className="mt-auto pt-6">
           <div className="h-px w-full bg-white/10 mb-4"></div>
