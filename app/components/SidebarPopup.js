@@ -1,8 +1,11 @@
-import { useState } from "react";
+
 import { Gamepad2, FolderHeart, Award, Menu, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SidebarPopup({ isOpen, setIsOpen }) {
+  const router = useRouter();
+  
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
@@ -13,7 +16,7 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
 
   return (
     <>
-      {/* Hamburger Button - Moved to be part of the component but positioned relative */}
+      {/* Hamburger Button */}
       <button
         onClick={toggleSidebar}
         className="flex items-center justify-center p-2 rounded-md bg-purple-800 hover:bg-purple-700 transition-colors"
@@ -22,15 +25,15 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Overlay that appears when sidebar is open */}
+      {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-opacity-50 z-30"
-          onClick={() => setIsOpen(false)}
+          onClick={closeSidebar}
         />
       )}
 
-      {/* Sidebar with contained glass effect */}
+      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-72 bg-background/95 backdrop-blur-sm text-white p-4 z-40 transform transition-transform duration-300 ease-in-out border-r border-white border-opacity-10 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -38,10 +41,10 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
       >
         <div className="flex flex-col items-center mb-8 pt-4">
           <div className="flex justify-between items-center w-full mb-4">
-            <div className="w-6"></div> {/* Empty div for spacing */}
+            <div className="w-6"></div>
             <h1 className="text-3xl font-bold text-center">GamePulse</h1>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={closeSidebar}
               className="p-1 rounded-md hover:bg-white/10 transition-colors"
             >
               <X size={20} />
@@ -54,30 +57,32 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
           <ul className="space-y-4">
             {/* Games Page */}
             <li>
-              <button
-                onClick={() => navigateTo("/games")}
+              <Link
+                href="/games"
+                onClick={closeSidebar}
                 className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-700 hover:text-white transition-all"
               >
                 <Gamepad2 size={20} />
                 <span className="font-medium">Games Page</span>
-              </button>
+              </Link>
             </li>
 
             {/* Collections */}
             <li>
-              <button
-                onClick={() => navigateTo("/collections")}
+              <Link
+                href="/collections"
+                onClick={closeSidebar}
                 className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-700 hover:text-white transition-all"
               >
                 <FolderHeart size={20} />
                 <span className="font-medium">Collections</span>
-              </button>
+              </Link>
             </li>
 
             {/* Best Of Year */}
             <li>
               <Link
-                href="./best-of-year"
+                href="/best-of-year"
                 onClick={closeSidebar}
                 className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-700 hover:text-white transition-all"
               >
@@ -87,6 +92,7 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
             </li>
           </ul>
         </nav>
+        
         {/* Footer section */}
         <div className="mt-auto pt-6">
           <div className="h-px w-full bg-white/10 mb-4"></div>
