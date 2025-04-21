@@ -275,6 +275,16 @@ function NewsCard({ game }) {
           <p className="text-gray-400 text-sm mb-3">
             {game.description || ""}
           </p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {game.genres?.slice(0, 3).map((genre) => (
+              <span
+                key={genre.id}
+                className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded"
+              >
+                {genre.name}
+              </span>
+            ))}
+          </div>
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-1">
               {game.platforms?.slice(0, 3).map((platform) => (
