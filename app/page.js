@@ -228,8 +228,11 @@ function FeaturedCard({ game }) {
         </div>
         <div className="flex flex-wrap gap-2 mb-4">
           {game.genres?.slice(0, 3).map((genre) => (
-            <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded">
-              Popularity: {Math.round(game.popularity)}
+            <span
+              key={genre.id}
+              className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded"
+            >
+              {genre.name}
             </span>
           ))}
         </div>
@@ -270,10 +273,7 @@ function NewsCard({ game }) {
             </div>
           </div>
           <p className="text-gray-400 text-sm mb-3">
-            {game.tags
-              ?.slice(0, 2)
-              .map((tag) => tag.name)
-              .join(", ")}
+            {game.description || ""}
           </p>
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-1">
