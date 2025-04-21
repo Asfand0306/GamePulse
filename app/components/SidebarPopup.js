@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { Gamepad2, FolderHeart, Award, Menu, X } from 'lucide-react';
 
 export default function SidebarPopup({ isOpen, setIsOpen }) {
-  
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
 
   const navigateTo = (path) => {
     console.log(`Navigating to: ${path}`);
@@ -15,63 +13,50 @@ export default function SidebarPopup({ isOpen, setIsOpen }) {
 
   return (
     <>
-      {/* Hamburger Button */}
-      <button
-        onClick={toggleSidebar}
-        className="p-2 rounded-md text-white z-50"
-        aria-label="Toggle menu"
-      >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
       {/* Sidebar with contained glass effect */}
       <div className={`fixed top-0 left-0 h-full w-64 backdrop-blur-md text-white p-4 z-40 transform transition-transform duration-300 ease-in-out border-r border-white border-opacity-10 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {/* Close button at the top */}
-        <div className="absolute top-4 right-4">
-          <button 
+        <div className="flex items-center justify-end space-x-4 mb-8">
+          <h1 className="text-xl font-bold">GameHub</h1>
+          <button
             onClick={toggleSidebar}
-            className="p-1.5 rounded-full hover:bg-background hover:bg-opacity-20 transition-all"
-            aria-label="Close menu"
+            className="p-2 rounded-md hover:bg-white hover:bg-opacity-10 transition-colors"
+            aria-label="Toggle menu"
           >
-            <X size={20} />
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        <div className="mb-8 pt-8">
-          <h1 className="text-xl font-bold">GameHub</h1>
-        </div>
-       
         <nav className="flex-1">
           <ul className="space-y-2">
             {/* Games Page */}
             <li>
               <button
                 onClick={() => navigateTo('/games')}
-                className="w-full flex items-center p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all text-left"
+                className="w-full flex items-center p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all"
               >
-                <Gamepad2 className="mr-3" size={20} />
+                <Gamepad2 size={20} />
                 <span className="font-medium">Games Page</span>
               </button>
             </li>
-           
+
             {/* Collections */}
             <li>
               <button
                 onClick={() => navigateTo('/collections')}
-                className="w-full flex items-center p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all text-left"
+                className="w-full flex items-center p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all"
               >
-                <FolderHeart className="mr-3" size={20} />
+                <FolderHeart size={20} />
                 <span className="font-medium">Collections</span>
               </button>
             </li>
-           
+
             {/* Best Of Year */}
             <li>
               <button
                 onClick={() => navigateTo('/best-of-year')}
-                className="w-full flex items-center p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all text-left"
+                className="w-full flex items-center p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all"
               >
-                <Award className="mr-3" size={20} />
+                <Award size={20} />
                 <span className="font-medium">Best Of Year</span>
               </button>
             </li>
