@@ -1,24 +1,26 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect,useMemo } from "react";
 import { Clock, Search, RefreshCw, ExternalLink } from "lucide-react";
 
 // Platform Filter Component
 // This component allows users to filter games by platform
 const PlatformFilter = ({ selectedPlatform, setSelectedPlatform }) => {
   const platforms = [
-    { id: 4, name: 'PC' },
-    { id: 187, name: 'PS5' },
-    { id: 1, name: 'Xbox' },
-    { id: 18, name: 'PS4' },
-    { id: 7, name: 'Switch' },
+    { id: 4, name: "PC" },
+    { id: 187, name: "PS5" },
+    { id: 1, name: "Xbox" },
+    { id: 18, name: "PS4" },
+    { id: 7, name: "Switch" },
   ];
 
   return (
     <div className="flex flex-wrap gap-2 mb-6">
-      <button 
+      <button
         onClick={() => setSelectedPlatform(null)}
         className={`px-3 py-1 rounded-md text-sm ${
-          !selectedPlatform ? 'bg-purple-700 text-white' : 'bg-gray-700 text-gray-300'
+          !selectedPlatform
+            ? "bg-purple-700 text-white"
+            : "bg-gray-700 text-gray-300"
         }`}
       >
         All Platforms
@@ -28,7 +30,9 @@ const PlatformFilter = ({ selectedPlatform, setSelectedPlatform }) => {
           key={platform.id}
           onClick={() => setSelectedPlatform(platform.id)}
           className={`px-3 py-1 rounded-md text-sm ${
-            selectedPlatform === platform.id ? 'bg-purple-700 text-white' : 'bg-gray-700 text-gray-300'
+            selectedPlatform === platform.id
+              ? "bg-purple-700 text-white"
+              : "bg-gray-700 text-gray-300"
           }`}
         >
           {platform.name}
@@ -37,7 +41,6 @@ const PlatformFilter = ({ selectedPlatform, setSelectedPlatform }) => {
     </div>
   );
 };
-
 
 // Main App Component
 export default function GamingNewsApp() {
@@ -54,24 +57,23 @@ export default function GamingNewsApp() {
   const fetchGamingNews = async () => {
     setLoading(true);
     try {
-      // Get current date and format as YYYY-MM-DD
       const today = new Date();
       const currentDate = today.toISOString().split("T")[0];
-
-      // Set a start date (e.g., 3 months ago)
       const startDate = new Date();
-      startDate.setMonth(today.getMonth() - 3);
+      startDate.setMonth(startDate.getMonth() - 3);
       const formattedStartDate = startDate.toISOString().split("T")[0];
 
-      // Using RAWG API with dynamic dates
+      // Modified API URL to sort by popularity
       const response = await fetch(
-        `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&dates=${formattedStartDate},${currentDate}&ordering=-released&page_size=10`
+        `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}` +
+          `&dates=${formattedStartDate},${currentDate}` +
+          "&ordering=-popularity" + // Sort by popularity descending
+          "&page_size=10"
       );
 
       if (!response.ok) {
         throw new Error("Failed to fetch gaming news");
       }
-
       const data = await response.json();
       setNews(data.results);
       setLoading(false);
@@ -80,12 +82,24 @@ export default function GamingNewsApp() {
       setLoading(false);
     }
   };
-  const filteredNews = news.filter((item) => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (selectedPlatform 
-      ? item.platforms?.some(p => p.platform.id === selectedPlatform)
-      : true)
-  );
+  const filteredNews = useMemo(() => {
+    return (
+      news
+        .filter(
+          (item) =>
+            item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (!selectedPlatform ||
+              item.platforms?.some((p) => p.platform.id === selectedPlatform))
+        )
+        // Sort by rating first, then popularity count
+        .sort((a, b) => {
+          if (b.rating !== a.rating) {
+            return b.rating - a.rating;
+          }
+          return b.popularity - a.popularity;
+        })
+    );
+  }, [news, searchTerm, selectedPlatform]);
   return (
     <div className="min-h-screen text-gray-200">
       {/* Header */}
@@ -111,17 +125,17 @@ export default function GamingNewsApp() {
           </div>
         </div>
       </header>
-  
+
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Platform Filter */}
         <section className="mb-6">
-          <PlatformFilter 
+          <PlatformFilter
             selectedPlatform={selectedPlatform}
             setSelectedPlatform={setSelectedPlatform}
           />
         </section>
-  
+
         {/* Featured Section */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -135,7 +149,7 @@ export default function GamingNewsApp() {
               <RefreshCw className="h-4 w-4 mr-1" /> Refresh
             </button>
           </div>
-  
+
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>
@@ -152,11 +166,11 @@ export default function GamingNewsApp() {
             </div>
           )}
         </section>
-  
+
         {/* Latest News Section */}
         <section>
           <h2 className="text-2xl font-bold text-white mb-6">Latest Updates</h2>
-  
+
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>
@@ -178,7 +192,7 @@ export default function GamingNewsApp() {
           )}
         </section>
       </main>
-  
+
       {/* Footer */}
       <footer className="bg-gray-950 text-gray-400 py-6">
         <div className="container mx-auto px-4 text-center">
@@ -214,11 +228,8 @@ function FeaturedCard({ game }) {
         </div>
         <div className="flex flex-wrap gap-2 mb-4">
           {game.genres?.slice(0, 3).map((genre) => (
-            <span
-              key={genre.id}
-              className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded"
-            >
-              {genre.name}
+            <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded">
+              Popularity: {Math.round(game.popularity)}
             </span>
           ))}
         </div>
