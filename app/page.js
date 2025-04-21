@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect,useMemo } from "react";
 import { Clock, Search, RefreshCw, ExternalLink } from "lucide-react";
+import Sidebar from "./components/SidebarPopup";
+import SidebarPopup from "./components/SidebarPopup";
 
 // Platform Filter Component
 // This component allows users to filter games by platform
@@ -104,7 +106,9 @@ export default function GamingNewsApp() {
     <div className="min-h-screen text-gray-200">
       {/* Header */}
       <header className="bg-purple-900 shadow-lg">
+      
         <div className="container mx-auto px-4 py-6">
+        <SidebarPopup />
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
               <h1 className="text-3xl font-bold text-white">GamePulse</h1>
