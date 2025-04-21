@@ -38,13 +38,13 @@ export default function GamingNewsApp() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200">
+    <div className="min-h-screen text-gray-200">
       {/* Header */}
       <header className="bg-purple-900 shadow-lg">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <h1 className="text-3xl font-bold text-purple-300">GamePulse</h1>
+              <h1 className="text-3xl font-bold text-white">GamePulse</h1>
               <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">DAILY</span>
             </div>
             <div className="relative w-full md:w-64">
@@ -66,7 +66,7 @@ export default function GamingNewsApp() {
         {/* Featured Section */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-purple-400">Today's Gaming Highlights</h2>
+            <h2 className="text-2xl font-bold text-white">Today's Gaming Highlights</h2>
             <button 
               onClick={fetchGamingNews} 
               className="flex items-center bg-purple-800 hover:bg-purple-700 text-white px-3 py-1 rounded-md transition"
@@ -94,7 +94,7 @@ export default function GamingNewsApp() {
 
         {/* Latest News Section */}
         <section>
-          <h2 className="text-2xl font-bold text-purple-400 mb-6">Latest Updates</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Latest Updates</h2>
           
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -141,7 +141,7 @@ function FeaturedCard({ game }) {
         />
       </div>
       <div className="p-4">
-        <h3 className="text-xl font-bold text-purple-300 mb-2">{game.name}</h3>
+        <h3 className="text-xl font-bold text-white mb-2">{game.name}</h3>
         <div className="flex justify-between items-center text-sm text-gray-400 mb-3">
           <div className="flex items-center">
             <Clock className="h-3 w-3 mr-1" /> 
@@ -184,7 +184,7 @@ function NewsCard({ game }) {
           />
         </div>
         <div className="w-full md:w-3/4 p-4">
-          <h3 className="text-lg font-bold text-purple-300 mb-2">{game.name}</h3>
+          <h3 className="text-lg font-bold text-white mb-2">{game.name}</h3>
           <div className="flex justify-between items-center text-xs text-gray-400 mb-3">
             <div className="flex items-center">
               <Clock className="h-3 w-3 mr-1" /> 
