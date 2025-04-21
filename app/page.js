@@ -107,32 +107,33 @@ export default function GamingNewsApp() {
   return (
     <div className="min-h-screen text-gray-200">
       {/* Header */}
+{/* Header */}
 <header className="bg-purple-900 shadow-lg relative">
   <div className="container mx-auto px-4 py-6">
     <div className="flex items-center justify-between">
       {/* Sidebar and logo container */}
       <div className="flex items-center space-x-4">
-      <SidebarPopup isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-        <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-45' : 'ml-0'}`}>
-          <div className="flex items-center">
-            <h1 className="text-3xl font-bold text-white">GamePulse</h1>
-            <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-              DAILY
-            </span>
-          </div>
+        <SidebarPopup isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <div className="flex items-center">
+          <h1 className="text-2xl md:text-3xl font-bold text-white">GamePulse</h1>
+          <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+            DAILY
+          </span>    
         </div>
       </div>
       
-      {/* Search bar */}
-      <div className="relative w-full md:w-64">
-        <input
-          type="text"
-          placeholder="Search games..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-gray-800 border border-purple-700 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-purple-400" />
+      {/* Search Bar */}
+      <div className="hidden md:block relative">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search games..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-purple-800/50 border border-purple-700 text-white rounded-full py-1 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full max-w-md"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+        </div>
       </div>
     </div>
   </div>
