@@ -18,7 +18,7 @@ export default function GamingNewsApp() {
     try {
       // Using RAWG API for gaming news
       const response = await fetch(
-        'https://api.rawg.io/api/games?key=2b6f93b6432d4809bf336c7d84b659a3&dates=2023-01-01,2024-04-10&ordering=-released&page_size=10'
+        `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&dates=2023-01-01,2024-04-10&ordering=-released&page_size=10`
       );
       
       if (!response.ok) {
@@ -33,7 +33,6 @@ export default function GamingNewsApp() {
       setLoading(false);
     }
   };
-
   const filteredNews = news.filter(item => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
