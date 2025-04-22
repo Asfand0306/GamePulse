@@ -113,6 +113,7 @@ export default function GamingNewsApp() {
   return (
     <div className="min-h-screen text-gray-200">
       {/* Header */}
+<<<<<<< Updated upstream
       <header className="bg-purple-900 shadow-lg relative">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -139,6 +140,26 @@ export default function GamingNewsApp() {
               </div>
             </div>
           </div>
+=======
+{/* Header */}
+<header className="bg-purple-900 shadow-lg relative">
+  <div className="container mx-auto px-4 py-6">
+    <div className="flex items-center justify-between">
+      {/* Sidebar and logo container */}
+      <div className="flex items-center space-x-4">
+        <SidebarPopup isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <div className="flex items-center">
+          {/* Logo Image */}
+          <img 
+            src="/assets/gamepulse.png" 
+            alt="GamePulse Logo"
+            className="h-20 w-20 mr-3" // Adjust size as needed
+          />
+          <h1 className="text-2xl md:text-3xl font-bold text-white">GamePulse</h1>
+          <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+            DAILY
+          </span>    
+>>>>>>> Stashed changes
         </div>
       </header>
 
