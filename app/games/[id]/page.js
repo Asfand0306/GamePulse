@@ -1,10 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { ChevronLeft, ExternalLink, Star, Gamepad2, Code, ShoppingCart, Calendar, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function GameDetails({ params }) {
+  // Unwrap the params promise
+  const { id } = use(params);
   const [game, setGame] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,14 +19,14 @@ export default function GameDetails({ params }) {
       try {
         // Fetch game details
         const gameResponse = await fetch(
-          `https://api.rawg.io/api/games/${params.id}?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}`
+          `https://api.rawg.io/api/games/${id}?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}`
         );
         if (!gameResponse.ok) throw new Error("Failed to fetch game details");
         const gameData = await gameResponse.json();
 
         // Fetch screenshots
         const screenshotsResponse = await fetch(
-          `https://api.rawg.io/api/games/${params.id}/screenshots?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}`
+          `https://api.rawg.io/api/games/${id}/screenshots?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}`
         );
         if (!screenshotsResponse.ok) throw new Error("Failed to fetch screenshots");
         const screenshotsData = await screenshotsResponse.json();
@@ -39,7 +41,7 @@ export default function GameDetails({ params }) {
     };
 
     fetchGameData();
-  }, [params.id]);
+  }, [id]); 
 
   if (loading) {
     return (
