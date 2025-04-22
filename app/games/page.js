@@ -1,14 +1,18 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { Search, Filter, ChevronLeft, ExternalLink, Star, Gamepad2, Code, ShoppingCart, Loader2 } from "lucide-react";
+import { Search, Filter, ChevronLeft, ExternalLink, Star, Gamepad2, Code, ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+// Store your API key here for development (replace in production with proper env handling)
+const API_KEY =  process.env.NEXT_PUBLIC_RAWG_API_KEY;
 
 export default function GamesPage() {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // Separate state for active search
   const [developers, setDevelopers] = useState([]);
   const [platforms, setPlatforms] = useState([]);
   const [genres, setGenres] = useState([]);
@@ -16,6 +20,8 @@ export default function GamesPage() {
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const router = useRouter();
 
   // Fetch initial data
@@ -23,38 +29,51 @@ export default function GamesPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch games
-        const gamesResponse = await fetch(
-          `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&page_size=40`
-        );
+        // Fetch games with search if term exists
+        const gamesUrl = searchQuery 
+          ? `https://api.rawg.io/api/games?key=${API_KEY}&search=${encodeURIComponent(searchQuery)}&page_size=40`
+          : `https://api.rawg.io/api/games?key=${API_KEY}&page_size=40&page=${page}`;
+
+        const gamesResponse = await fetch(gamesUrl);
         if (!gamesResponse.ok) throw new Error("Failed to fetch games");
         const gamesData = await gamesResponse.json();
 
-        // Fetch developers
-        const devResponse = await fetch(
-          `https://api.rawg.io/api/developers?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&page_size=20`
-        );
-        if (!devResponse.ok) throw new Error("Failed to fetch developers");
-        const devData = await devResponse.json();
+        // For search results, replace existing games
+        // For pagination, append new games
+        setGames(prev => searchQuery || page === 1 ? gamesData.results : [...prev, ...gamesData.results]);
+        setHasMore(gamesData.next !== null);
 
-        // Fetch platforms
-        const platformsResponse = await fetch(
-          `https://api.rawg.io/api/platforms?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&page_size=20`
-        );
-        if (!platformsResponse.ok) throw new Error("Failed to fetch platforms");
-        const platformsData = await platformsResponse.json();
+        // Only fetch these if we don't have them yet
+        if (developers.length === 0) {
+          const devResponse = await fetch(
+            `https://api.rawg.io/api/developers?key=${API_KEY}&page_size=100`
+          );
+          if (devResponse.ok) {
+            const devData = await devResponse.json();
+            setDevelopers(devData.results);
+          }
+        }
 
-        // Fetch genres
-        const genresResponse = await fetch(
-          `https://api.rawg.io/api/genres?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&page_size=20`
-        );
-        if (!genresResponse.ok) throw new Error("Failed to fetch genres");
-        const genresData = await genresResponse.json();
+        if (platforms.length === 0) {
+          const platformsResponse = await fetch(
+            `https://api.rawg.io/api/platforms?key=${API_KEY}&page_size=100`
+          );
+          if (platformsResponse.ok) {
+            const platformsData = await platformsResponse.json();
+            setPlatforms(platformsData.results);
+          }
+        }
 
-        setGames(gamesData.results);
-        setDevelopers(devData.results);
-        setPlatforms(platformsData.results);
-        setGenres(genresData.results);
+        if (genres.length === 0) {
+          const genresResponse = await fetch(
+            `https://api.rawg.io/api/genres?key=${API_KEY}&page_size=100`
+          );
+          if (genresResponse.ok) {
+            const genresData = await genresResponse.json();
+            setGenres(genresData.results);
+          }
+        }
+
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -63,27 +82,49 @@ export default function GamesPage() {
     };
 
     fetchData();
-  }, []);
+  }, [page, searchQuery]); // Changed from searchTerm to searchQuery
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchQuery(searchTerm); // Update the active search query
+    setPage(1); // Reset to first page when searching
+    setGames([]); // Clear existing games
+  };
 
   const filteredGames = useMemo(() => {
-    return games.filter(game => {
-      const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDeveloper = !selectedDeveloper || 
-        game.developers?.some(dev => dev.id === selectedDeveloper);
-      const matchesPlatform = !selectedPlatform || 
-        game.platforms?.some(platform => platform.platform.id === selectedPlatform);
-      const matchesGenre = !selectedGenre || 
-        game.genres?.some(genre => genre.id === selectedGenre);
-      
-      return matchesSearch && matchesDeveloper && matchesPlatform && matchesGenre;
-    });
-  }, [games, searchTerm, selectedDeveloper, selectedPlatform, selectedGenre]);
+    let result = [...games];
+    
+    // Apply filters only if we're not in search mode
+    if (!searchQuery) {
+      result = result.filter(game => {
+        const matchesDeveloper = !selectedDeveloper || 
+          game.developers?.some(dev => dev.id === selectedDeveloper);
+        const matchesPlatform = !selectedPlatform || 
+          game.platforms?.some(platform => platform.platform.id === selectedPlatform);
+        const matchesGenre = !selectedGenre || 
+          game.genres?.some(genre => genre.id === selectedGenre);
+        
+        return matchesDeveloper && matchesPlatform && matchesGenre;
+      });
+    }
+    
+    return result;
+  }, [games, searchQuery, selectedDeveloper, selectedPlatform, selectedGenre]);
 
   const clearFilters = () => {
     setSelectedDeveloper(null);
     setSelectedPlatform(null);
     setSelectedGenre(null);
     setSearchTerm("");
+    setSearchQuery("");
+    setPage(1);
+    setGames([]);
+  };
+
+  const loadMore = () => {
+    if (!loading && hasMore && !searchQuery) {
+      setPage(prev => prev + 1);
+    }
   };
 
   return (
@@ -100,7 +141,7 @@ export default function GamesPage() {
               Back
             </button>
             <h1 className="text-2xl font-bold text-white">Game Library</h1>
-            <div className="w-10"></div> {/* Spacer for alignment */}
+            <div className="w-10"></div>
           </div>
         </div>
       </header>
@@ -109,35 +150,54 @@ export default function GamesPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Search and Filters */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Search games..."
+                placeholder="Search any game..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-gray-800/50 border border-purple-700 text-white rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                  }}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-300 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
+            <button 
+              type="submit"
+              className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full transition"
+            >
+              Search
+            </button>
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center justify-center gap-2 bg-purple-800 hover:bg-purple-700 text-white px-4 py-2 rounded-full transition"
+              disabled={!!searchQuery}
             >
               <Filter size={18} />
               <span>Filters</span>
             </button>
-          </div>
+          </form>
 
           {/* Active filters */}
-          {(selectedDeveloper || selectedPlatform || selectedGenre || searchTerm) && (
+          {(selectedDeveloper || selectedPlatform || selectedGenre || searchQuery) && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className="text-sm text-gray-400">Active filters:</span>
               {selectedDeveloper && (
                 <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded flex items-center gap-1">
                   {developers.find(d => d.id === selectedDeveloper)?.name}
                   <button onClick={() => setSelectedDeveloper(null)} className="text-purple-200 hover:text-white">
-                    &times;
+                    <X className="h-3 w-3" />
                   </button>
                 </span>
               )}
@@ -145,7 +205,7 @@ export default function GamesPage() {
                 <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded flex items-center gap-1">
                   {platforms.find(p => p.id === selectedPlatform)?.name}
                   <button onClick={() => setSelectedPlatform(null)} className="text-purple-200 hover:text-white">
-                    &times;
+                    <X className="h-3 w-3" />
                   </button>
                 </span>
               )}
@@ -153,29 +213,34 @@ export default function GamesPage() {
                 <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded flex items-center gap-1">
                   {genres.find(g => g.id === selectedGenre)?.name}
                   <button onClick={() => setSelectedGenre(null)} className="text-purple-200 hover:text-white">
-                    &times;
+                    <X className="h-3 w-3" />
                   </button>
                 </span>
               )}
-              {searchTerm && (
+              {searchQuery && (
                 <span className="text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded flex items-center gap-1">
-                  Search: "{searchTerm}"
-                  <button onClick={() => setSearchTerm("")} className="text-purple-200 hover:text-white">
-                    &times;
+                  Search: "{searchQuery}"
+                  <button onClick={() => {
+                    setSearchTerm("");
+                    setSearchQuery("");
+                    setPage(1);
+                    setGames([]);
+                  }} className="text-purple-200 hover:text-white">
+                    <X className="h-3 w-3" />
                   </button>
                 </span>
               )}
               <button 
                 onClick={clearFilters}
-                className="text-xs text-purple-400 hover:text-purple-300 ml-2"
+                className="text-xs text-purple-400 hover:text-purple-300 ml-2 flex items-center gap-1"
               >
-                Clear all
+                <X className="h-3 w-3" /> Clear all
               </button>
             </div>
           )}
 
           {/* Filters dropdown */}
-          {showFilters && (
+          {showFilters && !searchQuery && (
             <div className="bg-gray-800 rounded-lg p-4 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Developer filter */}
@@ -183,7 +248,7 @@ export default function GamesPage() {
                   <h3 className="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2">
                     <Code size={16} /> Developers
                   </h3>
-                  <div className="max-h-40 overflow-y-auto">
+                  <div className="max-h-60 overflow-y-auto pr-2">
                     {developers.map(developer => (
                       <div key={developer.id} className="flex items-center mb-2">
                         <input
@@ -207,7 +272,7 @@ export default function GamesPage() {
                   <h3 className="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2">
                     <Gamepad2 size={16} /> Platforms
                   </h3>
-                  <div className="max-h-40 overflow-y-auto">
+                  <div className="max-h-60 overflow-y-auto pr-2">
                     {platforms.map(platform => (
                       <div key={platform.id} className="flex items-center mb-2">
                         <input
@@ -231,7 +296,7 @@ export default function GamesPage() {
                   <h3 className="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2">
                     <ShoppingCart size={16} /> Genres
                   </h3>
-                  <div className="max-h-40 overflow-y-auto">
+                  <div className="max-h-60 overflow-y-auto pr-2">
                     {genres.map(genre => (
                       <div key={genre.id} className="flex items-center mb-2">
                         <input
@@ -255,7 +320,7 @@ export default function GamesPage() {
         </div>
 
         {/* Games Grid */}
-        {loading ? (
+        {loading && games.length === 0 ? (
           <div className="flex justify-center items-center h-64">
             <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
           </div>
@@ -265,14 +330,39 @@ export default function GamesPage() {
           </div>
         ) : filteredGames.length === 0 ? (
           <div className="bg-gray-800 p-6 rounded-lg text-center">
-            No games found matching your criteria. Try adjusting your filters.
+            {searchQuery ? (
+              `No games found for "${searchQuery}". Try a different search term.`
+            ) : (
+              "No games found matching your criteria. Try adjusting your filters."
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredGames.map(game => (
-              <GameCard key={game.id} game={game} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredGames.map(game => (
+                <GameCard key={game.id} game={game} />
+              ))}
+            </div>
+            
+            {!searchQuery && hasMore && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={loadMore}
+                  disabled={loading}
+                  className="bg-purple-800 hover:bg-purple-700 text-white px-6 py-2 rounded-full flex items-center gap-2 transition"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Load More Games"
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
@@ -280,6 +370,16 @@ export default function GamesPage() {
 }
 
 function GameCard({ game }) {
+  const getReleaseStatus = () => {
+    if (!game.released) return "TBD";
+    
+    const releaseDate = new Date(game.released);
+    if (isNaN(releaseDate.getTime()) || releaseDate.getFullYear() < 1970) {
+      return game.status === "discontinued" ? "Discontinued" : "TBD";
+    }
+    return new Date(game.released).toLocaleDateString();
+  };
+
   return (
     <Link href={`/games/${game.id}`} className="group">
       <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition-all duration-300 h-full flex flex-col">
@@ -308,7 +408,7 @@ function GameCard({ game }) {
           </h3>
           <div className="flex justify-between items-center text-sm text-gray-400 mb-3">
             <div>
-              {game.released && new Date(game.released).toLocaleDateString()}
+              {getReleaseStatus()}
             </div>
             <div className="flex items-center bg-purple-900/50 px-2 py-0.5 rounded">
               <Star className="h-3 w-3 mr-1" />
