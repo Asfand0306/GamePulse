@@ -26,70 +26,70 @@ export default function CollectionsPage() {
     {
       id: 1,
       name: "Call of Duty",
-      slug: "call-of-duty",
+      slug: "call-of-duty-modern-warfare-2",
       image:
-        "https://media.rawg.io/media/games/587/587588c64afbeff73b3a0b1cd2388aa6.jpg",
+        "https://media.rawg.io/media/games/eb5/eb514db62d397c64288160d5bd8fd67a.jpg",
     },
     {
       id: 2,
       name: "Assassin's Creed",
-      slug: "assassins-creed",
+      slug: "assassins-creed-valhalla",
       image:
         "https://media.rawg.io/media/games/7cf/7cfc9220b401b7a300e409e539c9afd5.jpg",
     },
     {
       id: 3,
       name: "Grand Theft Auto",
-      slug: "grand-theft-auto",
+      slug: "grand-theft-auto-v",
       image:
         "https://media.rawg.io/media/games/84d/84da2ac3fdfc6507807a1808595afb12.jpg",
     },
     {
       id: 4,
       name: "The Legend of Zelda",
-      slug: "the-legend-of-zelda",
+      slug: "the-legend-of-zelda-breath-of-the-wild",
       image:
-        "https://media.rawg.io/media/games/3c1/3c139f67a73f0bf5ce0b8b2ee408db9b.jpg",
+        "https://media.rawg.io/media/games/cc1/cc196a5ad763955d6532cdba236f730c.jpg",
     },
     {
       id: 5,
       name: "Final Fantasy",
-      slug: "final-fantasy",
+      slug: "final-fantasy-vii-remake",
       image:
-        "https://media.rawg.io/media/games/d1a/d1a2e99ade53494c6330a0ed945fe823.jpg",
+        "https://media.rawg.io/media/games/4be/4be6a6ad0364751a96229c56bf69be59.jpg",
     },
     {
       id: 6,
       name: "Resident Evil",
-      slug: "resident-evil",
+      slug: "resident-evil-4",
       image:
-        "https://media.rawg.io/media/games/7f3/7f3a378e914615d7dfa8f6d6d8a5310e.jpg",
+        "https://media.rawg.io/media/games/8f7/8f750477485f86130a1a3d9d9d80b4a0.jpg",
     },
     {
       id: 7,
       name: "Super Mario",
-      slug: "super-mario",
+      slug: "super-mario-odyssey",
       image:
-        "https://media.rawg.io/media/games/367/367463bf43c8c5a96584e2d694826d8e.jpg",
+        "https://media.rawg.io/media/games/267/267bd0dbc496f52692487d07d014c061.jpg",
     },
     {
       id: 8,
       name: "Metal Gear",
-      slug: "metal-gear",
+      slug: "metal-gear-solid-v-the-phantom-pain",
       image:
-        "https://media.rawg.io/media/games/2b3/2b3f0b8d3f1b6a9f3e3a5f0e0b0e0e0e.jpg",
+        "https://media.rawg.io/media/games/cc2/cc2b1e0e98142b6bde0a5bbefb5b154f.jpg",
     },
     {
       id: 9,
       name: "Halo",
-      slug: "halo",
+      slug: "halo-infinite",
       image:
-        "https://media.rawg.io/media/games/120/1201a40e4364557b124392ee50317b99.jpg",
+        "https://media.rawg.io/media/games/34b/34b1f1850a1c06fd971bc6ab3ac0ce0e.jpg",
     },
     {
       id: 10,
       name: "God of War",
-      slug: "god-of-war",
+      slug: "god-of-war-2",
       image:
         "https://media.rawg.io/media/games/4be/4be6a6ad0364751a96229c56bf69be59.jpg",
     },
@@ -329,7 +329,18 @@ export default function CollectionsPage() {
 
 function GameCard({ game }) {
   const ratingStars = Math.round(game.rating);
-  const releaseYear = new Date(game.released).getFullYear();
+
+  // Improved release date handling
+  const getReleaseStatus = () => {
+    if (!game.released) return "TBD";
+
+    const releaseDate = new Date(game.released);
+    // Check for invalid date (like 1969-12-31)
+    if (isNaN(releaseDate.getTime()) || releaseDate.getFullYear() < 1970) {
+      return game.status === "discontinued" ? "Discontinued" : "TBD";
+    }
+    return releaseDate.getFullYear();
+  };
 
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/50 transition-all group">
@@ -357,7 +368,7 @@ function GameCard({ game }) {
                 {game.rating.toFixed(1)}
               </span>
             </div>
-            <span className="text-sm text-gray-300">{releaseYear}</span>
+            <span className="text-sm text-gray-300">{getReleaseStatus()}</span>
           </div>
         </div>
       </div>
