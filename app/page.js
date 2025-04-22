@@ -1,18 +1,43 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { Clock, Search, RefreshCw, ExternalLink } from "lucide-react";
+import { Clock, RefreshCw, ExternalLink } from "lucide-react";
 import SidebarPopup from "./components/SidebarPopup";
 
-// Category Filter Component
-const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
-  const categories = [
-    { id: "general", name: "All News" },
-    { id: "releases", name: "New Releases" },
-    { id: "esports", name: "Esports" },
-    { id: "industry", name: "Industry" },
-    { id: "hardware", name: "Hardware" },
-  ];
+// Your preferred websites will replace the original ones
+const targetSources = [
+  "thegamer.com",
+  "gamespot.com",
+  "polygon.com", 
+  "ign.com",
+  "theverge.com",
+  "eurogamer.net",
+  "kotaku.com"
+];
 
+const categories = [
+  { 
+    id: "releases", 
+    name: "New Releases", 
+    keywords: ["release", "launch", "comes out", "available now", "launches"] 
+  },
+  { 
+    id: "esports", 
+    name: "Esports", 
+    keywords: ["esports", "tournament", "competitive", "pro player", "championship"] 
+  },
+  { 
+    id: "industry", 
+    name: "Industry", 
+    keywords: ["studio", "developer", "acquisition", "merger", "layoff", "CEO", "executive"] 
+  },
+  { 
+    id: "hardware", 
+    name: "Hardware", 
+    keywords: ["console", "controller", "GPU", "CPU", "Steam Deck", "Nintendo", "PlayStation", "Xbox", "PC"] 
+  }
+];
+
+const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
   return (
     <div className="flex flex-wrap gap-2 mb-6">
       {categories.map((category) => (
@@ -36,8 +61,7 @@ export default function GamingNewsApp() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("general");
+  const [selectedCategory, setSelectedCategory] = useState("releases");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -47,72 +71,60 @@ export default function GamingNewsApp() {
   const fetchGamingNews = async () => {
     setLoading(true);
     try {
-      // Using World News API with gaming parameters
+      // Build source domains parameter
+      const sourceDomains = targetSources.join(',');
+      
       const response = await fetch(
         `https://api.worldnewsapi.com/search-news?` +
-          `text="gaming" OR "video games" OR "esports"` +
-          `&language=en` +
-          `&sort=publish-time` +
-          `&sort-direction=desc` +
-          `&api-key=${process.env.NEXT_PUBLIC_WORLD_NEWS_API_KEY}`
+        `text="game" OR "gaming" -sports -basketball -football -soccer` +
+        `&source-domains=${sourceDomains}` +
+        `&language=en` +
+        `&sort=publish-time` +
+        `&sort-direction=desc` +
+        `&number=30` +
+        `&api-key=${process.env.NEXT_PUBLIC_WORLD_NEWS_API_KEY}`
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch gaming news");
-      }
+      if (!response.ok) throw new Error("Failed to fetch gaming news");
       const data = await response.json();
-      setNews(data.news || []);
-      setLoading(false);
+      
+      // Additional filtering to ensure only gaming content
+      const gamingNews = (data.news || []).filter(article => 
+        article.title.toLowerCase().includes("game") || 
+        (article.text || "").toLowerCase().includes("game") ||
+        article.url.toLowerCase().includes("game")
+      );
+      
+      setNews(gamingNews);
     } catch (err) {
       setError("Failed to load gaming news. Please try again later.");
-      setLoading(false);
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const filteredNews = useMemo(() => {
-    let results = news.filter((item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let results = news;
 
-    // Apply category filters
-    if (selectedCategory !== "general") {
-      results = results.filter((item) => {
-        const title = item.title.toLowerCase();
-        switch (selectedCategory) {
-          case "releases":
-            return title.includes("release") || title.includes("launch");
-          case "esports":
-            return (
-              title.includes("esports") ||
-              title.includes("tournament") ||
-              title.includes("competitive")
-            );
-          case "industry":
-            return (
-              title.includes("studio") ||
-              title.includes("developer") ||
-              title.includes("acquisition")
-            );
-          case "hardware":
-            return (
-              title.includes("console") ||
-              title.includes("controller") ||
-              title.includes("pc") ||
-              title.includes("hardware")
-            );
-          default:
-            return true;
-        }
+    // Apply strict category filtering
+    if (selectedCategory) {
+      const categoryKeywords = categories.find(c => c.id === selectedCategory)?.keywords || [];
+      results = results.filter(article => {
+        const title = article.title.toLowerCase();
+        const text = (article.text || "").toLowerCase();
+        
+        return categoryKeywords.some(keyword => 
+          title.includes(keyword) || text.includes(keyword)
+        );
       });
     }
 
     return results;
-  }, [news, searchTerm, selectedCategory]);
+  }, [news, selectedCategory]);
 
   return (
     <div className="min-h-screen text-gray-200">
-      {/* Header */}
       <header className="bg-purple-900 shadow-lg relative">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -121,30 +133,15 @@ export default function GamingNewsApp() {
               <div className="flex items-center">
                 <h1 className="text-2xl md:text-3xl font-bold text-white">GamePulse</h1>
                 <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                  LIVE
+                  Daily
                 </span>
-              </div>
-            </div>
-            
-            <div className="hidden md:block relative">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search news..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-purple-800/50 border border-purple-700 text-white rounded-full py-1 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full max-w-md"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Category Filter */}
         <section className="mb-6">
           <CategoryFilter
             selectedCategory={selectedCategory}
@@ -152,11 +149,10 @@ export default function GamingNewsApp() {
           />
         </section>
 
-        {/* Featured News Section */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-white">
-              Breaking Gaming News
+              {categories.find(c => c.id === selectedCategory)?.name} News
             </h2>
             <button
               onClick={fetchGamingNews}
@@ -177,68 +173,72 @@ export default function GamingNewsApp() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredNews.slice(0, 3).map((article) => (
-                <FeaturedNewsCard key={article.id} article={article} />
+                <FeaturedNewsCard key={article.url} article={article} />
               ))}
             </div>
           )}
         </section>
 
-        {/* Latest News Section */}
         <section>
           <h2 className="text-2xl font-bold text-white mb-6">Latest Updates</h2>
 
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-red-900/30 border border-red-800 p-4 rounded-lg text-center">
-              {error}
-            </div>
-          ) : filteredNews.length === 0 ? (
+          {filteredNews.length === 0 ? (
             <div className="bg-gray-800 p-6 rounded-lg text-center">
-              No news found matching your search.
+              No {categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} news found from our premium sources.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {filteredNews.slice(3).map((article) => (
-                <NewsCard key={article.id} article={article} />
+                <NewsCard key={article.url} article={article} />
               ))}
             </div>
           )}
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="bg-gray-950 text-gray-400 py-6">
         <div className="container mx-auto px-4 text-center">
-          <p className="mb-2">© 2025 GameNews - Latest Video Game Updates</p>
-          <p className="text-sm">Powered by World News API</p>
+          <p className="mb-2">© 2025 GamePulse - Your premium gaming source</p>
         </div>
       </footer>
     </div>
   );
 }
 
-// Featured News Card Component
 function FeaturedNewsCard({ article }) {
+  const sourceName = article.source?.name || 
+                     article.url?.match(/https?:\/\/(www\.)?([^\/]+)/)?.[2]?.replace('www.', '') || 
+                     "Gaming News";
+  
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition">
-      <div className="h-48 overflow-hidden">
+      <div className="h-48 overflow-hidden relative">
         <img
-          src={article.image || "/placeholder-news.jpg"}
+          src={article.image || "/game-controller-placeholder.jpg"}
           alt={article.title}
           className="w-full h-full object-cover transform hover:scale-105 transition duration-500"
+          onError={(e) => {
+            e.target.src = "/game-controller-placeholder.jpg";
+          }}
         />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+          <span className="text-xs bg-purple-900/80 text-white px-2 py-1 rounded">
+            {sourceName}
+          </span>
+        </div>
       </div>
       <div className="p-4">
         <div className="flex items-center text-xs text-gray-400 mb-2">
           <Clock className="h-3 w-3 mr-1" />
-          {new Date(article.publish_date).toLocaleDateString()} • {article.source?.name}
+          {new Date(article.publish_date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">{article.title}</h3>
+        <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">{article.title}</h3>
         <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-          {article.text || article.summary || "No description available"}
+          {article.text || article.summary || "Click to read this gaming news story"}
         </p>
         <a
           href={article.url}
@@ -246,37 +246,50 @@ function FeaturedNewsCard({ article }) {
           rel="noopener noreferrer"
           className="inline-flex items-center text-purple-400 hover:text-purple-300"
         >
-          Read Full Story <ExternalLink className="h-3 w-3 ml-1" />
+          Read on {sourceName} <ExternalLink className="h-3 w-3 ml-1" />
         </a>
       </div>
     </div>
   );
 }
 
-// News Card Component
 function NewsCard({ article }) {
+  const sourceName = article.source?.name || 
+                     article.url?.match(/https?:\/\/(www\.)?([^\/]+)/)?.[2]?.replace('www.', '') || 
+                     "Gaming News";
+  
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-1/4 h-32 md:h-auto relative overflow-hidden">
           <img
-            src={article.image || "/placeholder-news.jpg"}
+            src={article.image || "/game-controller-placeholder.jpg"}
             alt={article.title}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+            onError={(e) => {
+              e.target.src = "/game-controller-placeholder.jpg";
+            }}
           />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+            <span className="text-xs bg-purple-900/80 text-white px-2 py-1 rounded">
+              {sourceName}
+            </span>
+          </div>
         </div>
         <div className="w-full md:w-3/4 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-bold text-white transition-all duration-300 hover:text-purple-400">
-              {article.title}
-            </h3>
-          </div>
-          <div className="flex items-center text-xs text-gray-400 mb-3">
+          <div className="flex items-center text-xs text-gray-400 mb-2">
             <Clock className="h-3 w-3 mr-1" />
-            {new Date(article.publish_date).toLocaleDateString()} • {article.source?.name}
+            {new Date(article.publish_date).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
+            })}
           </div>
+          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 hover:text-purple-400 transition-colors">
+            {article.title}
+          </h3>
           <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-            {article.text || article.summary || "No description available"}
+            {article.text || article.summary || "Click to read this gaming news story"}
           </p>
           <a
             href={article.url}
@@ -284,7 +297,7 @@ function NewsCard({ article }) {
             rel="noopener noreferrer"
             className="inline-flex items-center text-purple-400 hover:text-purple-300 text-sm transition-all duration-300 hover:scale-105"
           >
-            Read More <ExternalLink className="h-3 w-3 ml-1" />
+            Continue Reading <ExternalLink className="h-3 w-3 ml-1" />
           </a>
         </div>
       </div>
