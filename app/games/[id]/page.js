@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { ChevronLeft, ExternalLink, Star, Gamepad2, Code, ShoppingCart, Calendar, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,6 +8,8 @@ import Link from "next/link";
 const API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY;
 
 export default function GameDetails({ params }) {
+  // Unwrap the params promise
+  const { id } = use(params);
   const [game, setGame] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export default function GameDetails({ params }) {
     };
 
     fetchGameData();
-  }, [params.id]);
+  }, [id]); 
 
   if (loading) {
     return (
