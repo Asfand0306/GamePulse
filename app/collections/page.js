@@ -1,6 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Search, ChevronLeft, ExternalLink, Loader2, ListTree, Gamepad2, Star } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ExternalLink,
+  Loader2,
+  ListTree,
+  Gamepad2,
+  Star,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CollectionsPage() {
@@ -13,28 +21,78 @@ export default function CollectionsPage() {
   const [seriesLoading, setSeriesLoading] = useState(false);
   const router = useRouter();
 
-  // Predefined list of popular franchises with their IDs
+  // Predefined list of popular franchises with images
   const popularFranchises = [
-    { id: 1, name: "Call of Duty", slug: "call-of-duty" },
-    { id: 2, name: "Assassin's Creed", slug: "assassins-creed" },
-    { id: 3, name: "Grand Theft Auto", slug: "grand-theft-auto" },
-    { id: 4, name: "The Legend of Zelda", slug: "the-legend-of-zelda" },
-    { id: 5, name: "Final Fantasy", slug: "final-fantasy" },
-    { id: 6, name: "Resident Evil", slug: "resident-evil" },
-    { id: 7, name: "Super Mario", slug: "super-mario" },
-    { id: 8, name: "Metal Gear", slug: "metal-gear" },
-    { id: 9, name: "Halo", slug: "halo" },
-    { id: 10, name: "God of War", slug: "god-of-war" },
-    { id: 11, name: "Pokémon", slug: "pokemon" },
-    { id: 12, name: "The Witcher", slug: "the-witcher" },
-    { id: 13, name: "Dark Souls", slug: "dark-souls" },
-    { id: 14, name: "Elder Scrolls", slug: "elder-scrolls" },
-    { id: 15, name: "Fallout", slug: "fallout" },
-    { id: 16, name: "Battlefield", slug: "battlefield" },
-    { id: 17, name: "Far Cry", slug: "far-cry" },
-    { id: 18, name: "Mass Effect", slug: "mass-effect" },
-    { id: 19, name: "Borderlands", slug: "borderlands" },
-    { id: 20, name: "Tomb Raider", slug: "tomb-raider" }
+    {
+      id: 1,
+      name: "Call of Duty",
+      slug: "call-of-duty",
+      image:
+        "https://media.rawg.io/media/games/587/587588c64afbeff73b3a0b1cd2388aa6.jpg",
+    },
+    {
+      id: 2,
+      name: "Assassin's Creed",
+      slug: "assassins-creed",
+      image:
+        "https://media.rawg.io/media/games/7cf/7cfc9220b401b7a300e409e539c9afd5.jpg",
+    },
+    {
+      id: 3,
+      name: "Grand Theft Auto",
+      slug: "grand-theft-auto",
+      image:
+        "https://media.rawg.io/media/games/84d/84da2ac3fdfc6507807a1808595afb12.jpg",
+    },
+    {
+      id: 4,
+      name: "The Legend of Zelda",
+      slug: "the-legend-of-zelda",
+      image:
+        "https://media.rawg.io/media/games/3c1/3c139f67a73f0bf5ce0b8b2ee408db9b.jpg",
+    },
+    {
+      id: 5,
+      name: "Final Fantasy",
+      slug: "final-fantasy",
+      image:
+        "https://media.rawg.io/media/games/d1a/d1a2e99ade53494c6330a0ed945fe823.jpg",
+    },
+    {
+      id: 6,
+      name: "Resident Evil",
+      slug: "resident-evil",
+      image:
+        "https://media.rawg.io/media/games/7f3/7f3a378e914615d7dfa8f6d6d8a5310e.jpg",
+    },
+    {
+      id: 7,
+      name: "Super Mario",
+      slug: "super-mario",
+      image:
+        "https://media.rawg.io/media/games/367/367463bf43c8c5a96584e2d694826d8e.jpg",
+    },
+    {
+      id: 8,
+      name: "Metal Gear",
+      slug: "metal-gear",
+      image:
+        "https://media.rawg.io/media/games/2b3/2b3f0b8d3f1b6a9f3e3a5f0e0b0e0e0e.jpg",
+    },
+    {
+      id: 9,
+      name: "Halo",
+      slug: "halo",
+      image:
+        "https://media.rawg.io/media/games/120/1201a40e4364557b124392ee50317b99.jpg",
+    },
+    {
+      id: 10,
+      name: "God of War",
+      slug: "god-of-war",
+      image:
+        "https://media.rawg.io/media/games/4be/4be6a6ad0364751a96229c56bf69be59.jpg",
+    },
   ];
 
   // Initialize with popular franchises
@@ -55,38 +113,31 @@ export default function CollectionsPage() {
     try {
       // Search for games matching the search term
       const response = await fetch(
-        `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&search=${encodeURIComponent(searchTerm)}&page_size=20`
+        `https://api.rawg.io/api/games?key=${
+          process.env.NEXT_PUBLIC_RAWG_API_KEY
+        }&search=${encodeURIComponent(searchTerm)}&page_size=20`
       );
-      
+
       if (!response.ok) throw new Error("Failed to search games");
-      
+
       const data = await response.json();
-      
-      // Extract potential franchises from search results
-      const potentialFranchises = data.results.reduce((acc, game) => {
-        // Check if the game name contains the search term (likely a franchise)
-        if (game.name.toLowerCase().includes(searchTerm.toLowerCase())) {
-          const existing = acc.find(f => f.name.toLowerCase() === game.name.toLowerCase());
-          if (!existing) {
-            acc.push({
-              id: game.id,
-              name: game.name,
-              slug: game.slug,
-              image: game.background_image
-            });
-          }
-        }
-        return acc;
-      }, []);
-      
-      // Combine with predefined franchises if no results found
-      const results = potentialFranchises.length > 0 
-        ? potentialFranchises 
-        : popularFranchises.filter(f => 
-            f.name.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-      
-      setGameSeries(results);
+
+      if (data.results.length > 0) {
+        // Create a franchise entry from the first result
+        const newFranchise = {
+          id: data.results[0].id,
+          name: data.results[0].name.includes(searchTerm)
+            ? data.results[0].name
+            : `${searchTerm} Games`,
+          slug: data.results[0].slug,
+          image: data.results[0].background_image,
+        };
+
+        setGameSeries([newFranchise]);
+      } else {
+        setGameSeries([]);
+      }
+
       setLoading(false);
     } catch (err) {
       setError("Failed to perform search. Please try again later.");
@@ -95,29 +146,31 @@ export default function CollectionsPage() {
   };
 
   // Fetch games in a series
-  const fetchGamesInSeries = async (seriesSlug) => {
+  const fetchGamesInSeries = async (seriesSlug, seriesName) => {
     setSeriesLoading(true);
     try {
       // First try to get games in the same series using the game-series endpoint
       const seriesResponse = await fetch(
         `https://api.rawg.io/api/games/${seriesSlug}/game-series?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&page_size=40`
       );
-      
+
       if (seriesResponse.ok) {
         const seriesData = await seriesResponse.json();
         setSeriesGames(seriesData.results);
       } else {
         // Fallback to searching for games with the franchise name
         const searchResponse = await fetch(
-          `https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&search=${encodeURIComponent(seriesSlug)}&page_size=40`
+          `https://api.rawg.io/api/games?key=${
+            process.env.NEXT_PUBLIC_RAWG_API_KEY
+          }&search=${encodeURIComponent(seriesName)}&page_size=40`
         );
-        
+
         if (!searchResponse.ok) throw new Error("Failed to fetch games");
-        
+
         const searchData = await searchResponse.json();
         setSeriesGames(searchData.results);
       }
-      
+
       setSeriesLoading(false);
     } catch (err) {
       setError("Failed to load series games. Please try again later.");
@@ -127,7 +180,7 @@ export default function CollectionsPage() {
 
   const handleSeriesSelect = (series) => {
     setSelectedSeries(series);
-    fetchGamesInSeries(series.slug);
+    fetchGamesInSeries(series.slug, series.name);
   };
 
   return (
@@ -153,16 +206,19 @@ export default function CollectionsPage() {
       <main className="container mx-auto px-4 py-8">
         {!selectedSeries ? (
           <div>
-            <form onSubmit={handleSearch} className="relative mb-8 max-w-md mx-auto">
+            <form
+              onSubmit={handleSearch}
+              className="relative mb-8 max-w-md mx-auto"
+            >
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search game franchises..."
+                  placeholder="Search game franchises (e.g. 'Persona')..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="bg-gray-800/50 border border-purple-700 text-white rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
                 />
-                <button 
+                <button
                   type="submit"
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-300 hover:text-white"
                 >
@@ -185,24 +241,41 @@ export default function CollectionsPage() {
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center">
                   {searchTerm ? "Search Results" : "Popular Game Franchises"}
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {gameSeries.map((series) => (
-                    <div
-                      key={series.id}
-                      onClick={() => handleSeriesSelect(series)}
-                      className="bg-gray-800 hover:bg-gradient-to-br from-purple-900/50 to-indigo-900/50 text-white rounded-lg transition-all transform hover:scale-[1.02] group relative overflow-hidden h-48 cursor-pointer"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                      <div className="relative z-10 p-4 h-full flex flex-col justify-end">
-                        <h3 className="text-xl font-bold text-white mb-1">{series.name}</h3>
-                        <div className="flex items-center text-sm text-purple-300">
-                          <Gamepad2 className="h-4 w-4 mr-1" />
-                          Click to view games
+                {gameSeries.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-400">
+                      No franchises found. Try a different search.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {gameSeries.map((series) => (
+                      <div
+                        key={series.id}
+                        onClick={() => handleSeriesSelect(series)}
+                        className="bg-gray-800 hover:bg-gradient-to-br from-purple-900/50 to-indigo-900/50 text-white rounded-lg transition-all transform hover:scale-[1.02] group relative overflow-hidden h-48 cursor-pointer"
+                      >
+                        {series.image && (
+                          <img
+                            src={series.image}
+                            alt={series.name}
+                            className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 transition"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div className="relative z-10 p-4 h-full flex flex-col justify-end">
+                          <h3 className="text-xl font-bold text-white mb-1">
+                            {series.name}
+                          </h3>
+                          <div className="flex items-center text-sm text-purple-300">
+                            <Gamepad2 className="h-4 w-4 mr-1" />
+                            Click to view games
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -271,12 +344,18 @@ function GameCard({ game }) {
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star 
+                <Star
                   key={i}
-                  className={`h-4 w-4 ${i < ratingStars ? 'fill-yellow-400 text-yellow-400' : 'text-gray-500'}`}
+                  className={`h-4 w-4 ${
+                    i < ratingStars
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-500"
+                  }`}
                 />
               ))}
-              <span className="ml-2 text-sm text-gray-300">{game.rating.toFixed(1)}</span>
+              <span className="ml-2 text-sm text-gray-300">
+                {game.rating.toFixed(1)}
+              </span>
             </div>
             <span className="text-sm text-gray-300">{releaseYear}</span>
           </div>
