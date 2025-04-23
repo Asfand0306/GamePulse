@@ -17,7 +17,7 @@ export default function GameDetails({ params }) {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchGameData = async () => {
+    fetchGameData = async () => {
       setLoading(true);
       try {
         // Fetch game details
@@ -44,7 +44,7 @@ export default function GameDetails({ params }) {
     };
 
     fetchGameData();
-  }, [id]); 
+  }, [params.id]); 
 
   if (loading) {
     return (

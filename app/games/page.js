@@ -112,7 +112,7 @@ export default function GamesPage() {
     };
 
     fetchData();
-  }, [page, searchQuery, selectedDeveloper, selectedPlatform, selectedGenre]);
+  }, [page, searchQuery, selectedDeveloper, selectedPlatform, selectedGenre, buildApiUrl, developers.length, genres.length, platforms.length]);
 
   const handleSearch = (e) => {
     e.preventDefault();
