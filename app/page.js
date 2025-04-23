@@ -3,15 +3,10 @@ import { useState, useEffect, useMemo } from "react";
 import { Clock, RefreshCw, ExternalLink } from "lucide-react";
 import SidebarPopup from "./components/SidebarPopup";
 
-// Your preferred websites will replace the original ones
+// Focused specifically on video game news websites only
 const targetSources = [
-  "thegamer.com",
-  "gamespot.com",
-  "polygon.com",
   "ign.com",
-  "theverge.com",
-  "eurogamer.net",
-  "kotaku.com",
+  "gamespot.com",
 ];
 
 const categories = [
@@ -100,7 +95,8 @@ export default function GamingNewsApp() {
 
       const response = await fetch(
         `https://api.worldnewsapi.com/search-news?` +
-          `text="game" OR "gaming" -sports -basketball -football -soccer` +
+          `text=("video game" OR "gaming" OR "game release" OR "new game")` +
+          ` -sports -basketball -football -soccer` +
           `&source-domains=${sourceDomains}` +
           `&language=en` +
           `&sort=publish-time` +
@@ -112,12 +108,20 @@ export default function GamingNewsApp() {
       if (!response.ok) throw new Error("Failed to fetch gaming news");
       const data = await response.json();
 
-      // Additional filtering to ensure only gaming content
+      // More specific filtering to ensure only video game content
       const gamingNews = (data.news || []).filter(
-        (article) =>
-          article.title.toLowerCase().includes("game") ||
-          (article.text || "").toLowerCase().includes("game") ||
-          article.url.toLowerCase().includes("game")
+        (article) => {
+          const title = article.title.toLowerCase();
+          const text = (article.text || "").toLowerCase();
+          
+          // Look for specific video game related terms
+          const videoGameTerms = ["video game", "gaming", "gameplay", "playstation", "xbox", 
+                                "nintendo", "pc game", "console", "game release"];
+          
+          return videoGameTerms.some(term => 
+            title.includes(term) || text.includes(term)
+          );
+        }
       );
 
       setNews(gamingNews);
