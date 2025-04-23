@@ -142,7 +142,7 @@ export default function BestOfYear() {
               <ChevronLeft className="h-5 w-5 mr-1 group-hover:-translate-x-1 transition-transform" />
               Back
             </button>
-            <h1 className="text-4xl font-bold text-white flex items-center bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-300">
+            <h1 className="text-4xl font-bold text-white flex items-center bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-300">
               <Trophy className="h-8 w-8 mr-3 text-yellow-400" />
               Hall of Gaming Fame
             </h1>
