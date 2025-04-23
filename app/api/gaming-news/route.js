@@ -1,25 +1,35 @@
 // app/api/gaming-news/route.js
 export async function GET() {
     try {
-      // Gaming-specific keywords for better filtering
-      const gamingKeywords = 'gaming OR "video games" OR playstation OR xbox OR nintendo';
+      // Expanded gaming keywords for better filtering
+      const gamingKeywords = 'gaming OR "video games" OR playstation OR xbox OR nintendo OR "pc games" OR steam OR "game release" OR esports OR "game review" OR patch OR update OR DLC';
       
-      // List of gaming news sources
+      // Expanded list of gaming news sources
       const targetSources = [
         "ign.com",
         "gamespot.com",
+        "pcgamer.com",
+        "polygon.com",
+        "eurogamer.net",
+        "rockpapershotgun.com",
+        "kotaku.com",
+        "destructoid.com",
+        "theverge.com/gaming",
+        "gameinformer.com",
+        "vg247.com",
+        "dualshockers.com",
       ];
       
       console.log("Fetching news from NewsAPI...");
       
-      // Call NewsAPI from the server side
+      // Call NewsAPI from the server side with increased pageSize
       const response = await fetch(
         `https://newsapi.org/v2/everything?` +
         `q=${encodeURIComponent(gamingKeywords)}` +
         `&domains=${targetSources.join(',')}` +
         `&language=en` +
         `&sortBy=publishedAt` +
-        `&pageSize=30` +
+        `&pageSize=50` +  // Increased from 30 to 50
         `&apiKey=${process.env.NEWS_API_KEY}`
       );
   
@@ -53,4 +63,4 @@ export async function GET() {
       console.error('Server error fetching gaming news:', error);
       return Response.json({ error: error.message || "Internal server error" }, { status: 500 });
     }
-  }
+}

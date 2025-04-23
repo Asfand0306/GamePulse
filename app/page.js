@@ -3,17 +3,28 @@ import { useState, useEffect, useMemo } from "react";
 import { Clock, RefreshCw, ExternalLink } from "lucide-react";
 import SidebarPopup from "./components/SidebarPopup";
 
-// Focused specifically on video game news websites only
+// Expanded list of gaming news websites
 const targetSources = [
   "ign.com",
   "gamespot.com",
+  "pcgamer.com",
+  "polygon.com",
+  "eurogamer.net",
+  "rockpapershotgun.com",
+  "kotaku.com",
+  "destructoid.com",
+  "theverge.com/gaming",
+  "gameinformer.com",
+  "vg247.com",
+  "dualshockers.com",
 ];
 
+// Updated gaming-focused categories
 const categories = [
   {
     id: "releases",
     name: "New Releases",
-    keywords: ["release", "launch", "comes out", "available now", "launches"],
+    keywords: ["release", "launch", "comes out", "available now", "launches", "announced"],
   },
   {
     id: "esports",
@@ -24,36 +35,45 @@ const categories = [
       "competitive",
       "pro player",
       "championship",
+      "league",
+      "valorant",
+      "counter-strike",
+      "dota",
+      "overwatch",
     ],
   },
   {
-    id: "industry",
-    name: "Industry",
+    id: "updates",
+    name: "Game Updates",
     keywords: [
-      "studio",
-      "developer",
-      "acquisition",
-      "merger",
-      "layoff",
-      "CEO",
-      "executive",
+      "update",
+      "patch",
+      "season",
+      "balance",
+      "hotfix",
+      "bug fix",
+      "DLC",
+      "expansion",
+      "content update",
     ],
   },
   {
-    id: "hardware",
-    name: "Hardware",
+    id: "reviews",
+    name: "Reviews",
     keywords: [
-      "console",
-      "controller",
-      "GPU",
-      "CPU",
-      "Steam Deck",
-      "Nintendo",
-      "PlayStation",
-      "Xbox",
-      "PC",
+      "review",
+      "impressions",
+      "rating",
+      "score",
+      "critique",
+      "analysis",
     ],
   },
+  {
+    id: "deals",
+    name: "Deals",
+    keywords: ["sale", "discount", "deal", "free", "giveaway", "bundle"]
+  }
 ];
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
