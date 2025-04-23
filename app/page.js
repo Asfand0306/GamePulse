@@ -83,55 +83,36 @@ export default function GamingNewsApp() {
   const [selectedCategory, setSelectedCategory] = useState("releases");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    fetchGamingNews();
-  }, []);
+// Updated fetchGamingNews function using NewsAPI
+useEffect(() => {
+  fetchGamingNews();
+}, []);
 
-  const fetchGamingNews = async () => {
-    setLoading(true);
-    try {
-      // Build source domains parameter
-      const sourceDomains = targetSources.join(",");
 
-      const response = await fetch(
-        `https://api.worldnewsapi.com/search-news?` +
-          `text=("video game" OR "gaming" OR "game release" OR "new game")` +
-          ` -sports -basketball -football -soccer` +
-          `&source-domains=${sourceDomains}` +
-          `&language=en` +
-          `&sort=publish-time` +
-          `&sort-direction=desc` +
-          `&number=30` +
-          `&api-key=${process.env.NEXT_PUBLIC_WORLD_NEWS_API_KEY}`
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch gaming news");
-      const data = await response.json();
-
-      // More specific filtering to ensure only video game content
-      const gamingNews = (data.news || []).filter(
-        (article) => {
-          const title = article.title.toLowerCase();
-          const text = (article.text || "").toLowerCase();
-          
-          // Look for specific video game related terms
-          const videoGameTerms = ["video game", "gaming", "gameplay", "playstation", "xbox", 
-                                "nintendo", "pc game", "console", "game release"];
-          
-          return videoGameTerms.some(term => 
-            title.includes(term) || text.includes(term)
-          );
-        }
-      );
-
-      setNews(gamingNews);
-    } catch (err) {
-      setError("Failed to load gaming news. Please try again later.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+const fetchGamingNews = async () => {
+  setLoading(true);
+  try {
+    const response = await fetch('/api/gaming-news');
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch gaming news');
     }
-  };
+    
+    const data = await response.json();
+    setNews(data.news);
+    
+    if (data.news.length === 0) {
+      setError("No gaming news found. Try refreshing or adjusting filters.");
+    }
+  } catch (err) {
+    console.error("News fetch error:", err);
+    setError(`Failed to load gaming news: ${err.message}`);
+    setNews([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filteredNews = useMemo(() => {
     let results = news;
