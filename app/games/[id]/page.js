@@ -1,15 +1,14 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ExternalLink, Star, Gamepad2, Code, ShoppingCart, Calendar, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { use } from "react";
 
 // Store your API key here for development (replace in production with proper env handling)
 const API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY;
 
 export default function GameDetails({ params }) {
-  // Unwrap the params promise
-  const { id } = use(params);
+  const { id } = use(params); // Directly destructure id from params
   const [game, setGame] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,19 +16,19 @@ export default function GameDetails({ params }) {
   const router = useRouter();
 
   useEffect(() => {
-    fetchGameData = async () => {
+    const fetchGameData = async () => {
       setLoading(true);
       try {
         // Fetch game details
         const gameResponse = await fetch(
-          `https://api.rawg.io/api/games/${params.id}?key=${API_KEY}`
+          `https://api.rawg.io/api/games/${id}?key=${API_KEY}`
         );
         if (!gameResponse.ok) throw new Error("Failed to fetch game details");
         const gameData = await gameResponse.json();
 
         // Fetch screenshots
         const screenshotsResponse = await fetch(
-          `https://api.rawg.io/api/games/${params.id}/screenshots?key=${API_KEY}`
+          `https://api.rawg.io/api/games/${id}/screenshots?key=${API_KEY}`
         );
         if (!screenshotsResponse.ok) throw new Error("Failed to fetch screenshots");
         const screenshotsData = await screenshotsResponse.json();
@@ -44,7 +43,7 @@ export default function GameDetails({ params }) {
     };
 
     fetchGameData();
-  }, [params.id]); 
+  }, [id]); // Use id directly
 
   if (loading) {
     return (
