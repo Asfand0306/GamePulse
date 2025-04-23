@@ -1,10 +1,8 @@
 
 import { Gamepad2, FolderHeart, Award, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function SidebarPopup({ isOpen, setIsOpen }) {
-  const router = useRouter();
   
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
