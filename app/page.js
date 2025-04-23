@@ -6,34 +6,58 @@ import SidebarPopup from "./components/SidebarPopup";
 const targetSources = [
   "thegamer.com",
   "gamespot.com",
-  "polygon.com", 
+  "polygon.com",
   "ign.com",
   "theverge.com",
   "eurogamer.net",
-  "kotaku.com"
+  "kotaku.com",
 ];
 
 const categories = [
-  { 
-    id: "releases", 
-    name: "New Releases", 
-    keywords: ["release", "launch", "comes out", "available now", "launches"] 
+  {
+    id: "releases",
+    name: "New Releases",
+    keywords: ["release", "launch", "comes out", "available now", "launches"],
   },
-  { 
-    id: "esports", 
-    name: "Esports", 
-    keywords: ["esports", "tournament", "competitive", "pro player", "championship"] 
+  {
+    id: "esports",
+    name: "Esports",
+    keywords: [
+      "esports",
+      "tournament",
+      "competitive",
+      "pro player",
+      "championship",
+    ],
   },
-  { 
-    id: "industry", 
-    name: "Industry", 
-    keywords: ["studio", "developer", "acquisition", "merger", "layoff", "CEO", "executive"] 
+  {
+    id: "industry",
+    name: "Industry",
+    keywords: [
+      "studio",
+      "developer",
+      "acquisition",
+      "merger",
+      "layoff",
+      "CEO",
+      "executive",
+    ],
   },
-  { 
-    id: "hardware", 
-    name: "Hardware", 
-    keywords: ["console", "controller", "GPU", "CPU", "Steam Deck", "Nintendo", "PlayStation", "Xbox", "PC"] 
-  }
+  {
+    id: "hardware",
+    name: "Hardware",
+    keywords: [
+      "console",
+      "controller",
+      "GPU",
+      "CPU",
+      "Steam Deck",
+      "Nintendo",
+      "PlayStation",
+      "Xbox",
+      "PC",
+    ],
+  },
 ];
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
@@ -71,29 +95,30 @@ export default function GamingNewsApp() {
     setLoading(true);
     try {
       // Build source domains parameter
-      const sourceDomains = targetSources.join(',');
-      
+      const sourceDomains = targetSources.join(",");
+
       const response = await fetch(
         `https://api.worldnewsapi.com/search-news?` +
-        `text="game" OR "gaming" -sports -basketball -football -soccer` +
-        `&source-domains=${sourceDomains}` +
-        `&language=en` +
-        `&sort=publish-time` +
-        `&sort-direction=desc` +
-        `&number=30` +
-        `&api-key=${process.env.NEXT_PUBLIC_WORLD_NEWS_API_KEY}`
+          `text="game" OR "gaming" -sports -basketball -football -soccer` +
+          `&source-domains=${sourceDomains}` +
+          `&language=en` +
+          `&sort=publish-time` +
+          `&sort-direction=desc` +
+          `&number=30` +
+          `&api-key=${process.env.NEXT_PUBLIC_WORLD_NEWS_API_KEY}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch gaming news");
       const data = await response.json();
-      
+
       // Additional filtering to ensure only gaming content
-      const gamingNews = (data.news || []).filter(article => 
-        article.title.toLowerCase().includes("game") || 
-        (article.text || "").toLowerCase().includes("game") ||
-        article.url.toLowerCase().includes("game")
+      const gamingNews = (data.news || []).filter(
+        (article) =>
+          article.title.toLowerCase().includes("game") ||
+          (article.text || "").toLowerCase().includes("game") ||
+          article.url.toLowerCase().includes("game")
       );
-      
+
       setNews(gamingNews);
     } catch (err) {
       setError("Failed to load gaming news. Please try again later.");
@@ -108,13 +133,14 @@ export default function GamingNewsApp() {
 
     // Apply strict category filtering
     if (selectedCategory) {
-      const categoryKeywords = categories.find(c => c.id === selectedCategory)?.keywords || [];
-      results = results.filter(article => {
+      const categoryKeywords =
+        categories.find((c) => c.id === selectedCategory)?.keywords || [];
+      results = results.filter((article) => {
         const title = article.title.toLowerCase();
         const text = (article.text || "").toLowerCase();
-        
-        return categoryKeywords.some(keyword => 
-          title.includes(keyword) || text.includes(keyword)
+
+        return categoryKeywords.some(
+          (keyword) => title.includes(keyword) || text.includes(keyword)
         );
       });
     }
@@ -128,9 +154,14 @@ export default function GamingNewsApp() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <SidebarPopup isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+              <SidebarPopup
+                isOpen={isSidebarOpen}
+                setIsOpen={setIsSidebarOpen}
+              />
               <div className="flex items-center">
-                <h1 className="text-2xl md:text-3xl font-bold text-white">GamePulse</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                  GamePulse
+                </h1>
                 <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
                   Daily
                 </span>
@@ -151,7 +182,7 @@ export default function GamingNewsApp() {
         <section className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-white">
-              {categories.find(c => c.id === selectedCategory)?.name} News
+              {categories.find((c) => c.id === selectedCategory)?.name} News
             </h2>
             <button
               onClick={fetchGamingNews}
@@ -183,7 +214,11 @@ export default function GamingNewsApp() {
 
           {filteredNews.length === 0 ? (
             <div className="bg-gray-800 p-6 rounded-lg text-center">
-              No {categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} news found from our premium sources.
+              No{" "}
+              {categories
+                .find((c) => c.id === selectedCategory)
+                ?.name.toLowerCase()}{" "}
+              news found from our premium sources.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
@@ -205,10 +240,13 @@ export default function GamingNewsApp() {
 }
 
 function FeaturedNewsCard({ article }) {
-  const sourceName = article.source?.name || 
-                     article.url?.match(/https?:\/\/(www\.)?([^\/]+)/)?.[2]?.replace('www.', '') || 
-                     "Gaming News";
-  
+  const sourceName =
+    article.source?.name ||
+    article.url
+      ?.match(/https?:\/\/(www\.)?([^\/]+)/)?.[2]
+      ?.replace("www.", "") ||
+    "Gaming News";
+
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition">
       <div className="h-48 overflow-hidden relative">
@@ -229,15 +267,19 @@ function FeaturedNewsCard({ article }) {
       <div className="p-4">
         <div className="flex items-center text-xs text-gray-400 mb-2">
           <Clock className="h-3 w-3 mr-1" />
-          {new Date(article.publish_date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
+          {new Date(article.publish_date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
           })}
         </div>
-        <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">{article.title}</h3>
+        <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
+          {article.title}
+        </h3>
         <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-          {article.text || article.summary || "Click to read this gaming news story"}
+          {article.text ||
+            article.summary ||
+            "Click to read this gaming news story"}
         </p>
         <a
           href={article.url}
@@ -253,10 +295,13 @@ function FeaturedNewsCard({ article }) {
 }
 
 function NewsCard({ article }) {
-  const sourceName = article.source?.name || 
-                     article.url?.match(/https?:\/\/(www\.)?([^\/]+)/)?.[2]?.replace('www.', '') || 
-                     "Gaming News";
-  
+  const sourceName =
+    article.source?.name ||
+    article.url
+      ?.match(/https?:\/\/(www\.)?([^\/]+)/)?.[2]
+      ?.replace("www.", "") ||
+    "Gaming News";
+
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
       <div className="flex flex-col md:flex-row">
@@ -278,17 +323,19 @@ function NewsCard({ article }) {
         <div className="w-full md:w-3/4 p-4">
           <div className="flex items-center text-xs text-gray-400 mb-2">
             <Clock className="h-3 w-3 mr-1" />
-            {new Date(article.publish_date).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
+            {new Date(article.publish_date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
             })}
           </div>
           <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 hover:text-purple-400 transition-colors">
             {article.title}
           </h3>
           <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-            {article.text || article.summary || "Click to read this gaming news story"}
+            {article.text ||
+              article.summary ||
+              "Click to read this gaming news story"}
           </p>
           <a
             href={article.url}
