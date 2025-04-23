@@ -256,11 +256,11 @@ function FeaturedNewsCard({ article }) {
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-900/30 transition">
       <div className="h-48 overflow-hidden relative">
         <img
-          src={article.image || "/game-controller-placeholder.jpg"}
+          src={article.image || "/assets/game-controller-placeholder.png"}
           alt={article.title}
           className="w-full h-full object-cover transform hover:scale-105 transition duration-500"
           onError={(e) => {
-            e.target.src = "/game-controller-placeholder.jpg";
+            e.target.src = "/assets/game-controller-placeholder.png";
           }}
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
@@ -312,11 +312,11 @@ function NewsCard({ article }) {
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-1/4 h-32 md:h-auto relative overflow-hidden">
           <img
-            src={article.image || "/game-controller-placeholder.jpg"}
+            src={article.image || "/assets/game-controller-placeholder.png"}
             alt={article.title}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
             onError={(e) => {
-              e.target.src = "/game-controller-placeholder.jpg";
+              e.target.src = "/assets/game-controller-placeholder.png";
             }}
           />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
